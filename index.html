@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1012">
+<title>Life Tracker</title>
+<style>
+:root{
+  --bg:#0f1012;--card:#181a1e;--card2:#202227;--border:#303238;
+  --text:#f3f3f3;--muted:#92959c;--fitness:#e45555;--project:#4caf72;--accent:#7087ff
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif}
+.app{max-width:900px;margin:auto;padding:20px}
+.header{margin-bottom:22px;display:flex;align-items:center;gap:16px}
+.profile-pic{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center 28%;flex-shrink:0;border:2px solid var(--border)}
+.header-text{min-width:0}
+.header h1{font-size:22px;margin:0}.header p{color:var(--muted);margin:5px 0 0;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:18px}
+.label{color:var(--muted);font-size:11px;letter-spacing:.06em}
+.weight-number{font-size:34px;font-weight:700;margin-top:12px}.goal{color:var(--muted);font-size:12px;margin-top:5px}
+.dual-stat{margin-top:14px;display:flex;justify-content:space-around;align-items:flex-start;gap:12px}
+.ring-stat{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.ring-label{font-size:12px;font-weight:700}
+.fitness-text{color:var(--fitness);font-weight:650}.project-text{color:var(--project);font-weight:650}
+.progress-ring{--percent:0;--ring-color:var(--accent);width:88px;height:88px;border-radius:50%;background:conic-gradient(var(--ring-color) calc(var(--percent)*1%),#34363c 0);display:grid;place-items:center;position:relative}
+.progress-ring::after{content:"";position:absolute;width:68px;height:68px;border-radius:50%;background:var(--card)}
+.progress-ring.fitness-ring{--ring-color:var(--fitness)}.progress-ring.project-ring{--ring-color:var(--project)}
+.ring-value{position:relative;z-index:1;font-size:13px;font-weight:750;white-space:nowrap}
+.fitness-fill{background:var(--fitness)}.project-fill{background:var(--project)}
+details{background:var(--card);border:1px solid var(--border);border-radius:15px;margin-bottom:14px;overflow:hidden}
+summary{padding:18px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
+summary::-webkit-details-marker{display:none}.summary-title{font-size:18px;font-weight:650}.summary-sub{color:var(--muted);font-size:13px;margin-top:4px}
+.arrow{font-size:20px;transition:.2s}details[open] .arrow{transform:rotate(180deg)}.content{border-top:1px solid var(--border);padding:18px}
+.month-nav{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:20px}
+.month-nav button{width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:white;font-size:18px;cursor:pointer}
+.month-name{min-width:130px;text-align:center;font-weight:650}
+.progress-group{margin-bottom:22px}.progress-row{margin-bottom:14px}.progress-info{display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px}
+.progress-track{width:100%;height:8px;background:#34363c;border-radius:100px;overflow:hidden}.progress-fill{height:100%;width:0;border-radius:100px;transition:width .25s}
+.week{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px}.week-title{background:var(--card2);padding:10px 13px;font-size:13px;font-weight:650}
+.day{display:grid;grid-template-columns:80px 1fr 1fr;align-items:center;gap:10px;padding:10px 13px;border-top:1px solid var(--border)}
+.date-small{font-size:11px;color:var(--muted);margin-top:2px}.task{display:flex;align-items:center;gap:9px}.task input{width:19px;height:19px;cursor:pointer}
+.fitness-task input{accent-color:var(--fitness)}.project-task input{accent-color:var(--project)}
+.task-title{display:block;font-size:14px;font-weight:650}.task-time{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.fitness-task .task-title{color:var(--fitness)}.project-task .task-title{color:var(--project)}
+.chart-wrap{overflow-x:auto}#weightChart{width:100%;min-width:580px;height:260px}
+.weight-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:14px;margin-top:15px}.weight-box{border:1px solid var(--border);border-radius:12px;padding:15px}.weight-box h3{margin:0 0 14px;font-size:15px}
+.form-row{display:grid;grid-template-columns:1fr 100px;gap:8px}
+input[type="date"],input[type="number"]{background:var(--card2);border:1px solid var(--border);border-radius:9px;color:white;padding:11px;font-size:16px;width:100%}
+.add-button{margin-top:8px;width:100%;border:0;background:var(--accent);color:white;border-radius:9px;padding:12px;font-size:14px;font-weight:650;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;color:var(--muted);font-weight:500}th,td{padding:9px 4px;border-bottom:1px solid var(--border)}
+.workout-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.workout-actions{grid-column:1/-1}
+.workout-link-button{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--card2);color:var(--text);font-size:13px;font-weight:700;letter-spacing:.04em;cursor:pointer}
+.workout-title{font-size:14px;font-weight:650}.workout-text{color:var(--muted);font-size:13px;line-height:1.55;margin-top:5px}
+@media(max-width:680px){
+ .app{padding:12px}.stats{grid-template-columns:1fr}.card{padding:16px}.profile-pic{width:66px;height:66px}.header h1{font-size:21px}
+ .day{grid-template-columns:58px 1fr 1fr;padding:10px;gap:7px}.task-title{font-size:13px}.task-time{font-size:10px}
+ .weight-grid,.workout-grid{grid-template-columns:1fr}.month-nav{justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <img src="profile_pic.jpg" alt="Profile" class="profile-pic">
+    <div class="header-text"><h1>Life Tracker</h1><p>12 October → 1 December 2026</p></div>
+  </div>
+
+  <section class="stats">
+    <div class="card">
+      <div class="label">CURRENT WEIGHT</div>
+      <div><span id="currentWeight" class="weight-number">81.1</span> <span>kg</span></div>
+      <div class="goal">Goal · 75 kg</div>
+    </div>
+
+    <div class="card">
+      <div class="label">THIS WEEK</div>
+      <div class="dual-stat">
+        <div class="ring-stat">
+          <span class="ring-label fitness-text">Fitness</span>
+          <div id="weekFitnessRing" class="progress-ring fitness-ring"><span id="weekFitnessText" class="ring-value">0 / 5h</span></div>
+        </div>
+        <div class="ring-stat">
+          <span class="ring-label project-text">Project</span>
+          <div id="weekProjectRing" class="progress-ring project-ring"><span id="weekProjectText" class="ring-value">0 / 25h</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">UNTIL THE END</div>
+      <div class="dual-stat">
+        <div class="ring-stat">
+          <span class="ring-label fitness-text">Fitness</span>
+          <div id="totalFitnessRing" class="progress-ring fitness-ring"><span id="totalFitnessText" class="ring-value">0 / 37h</span></div>
+        </div>
+        <div class="ring-stat">
+          <span class="ring-label project-text">Project</span>
+          <div id="totalProjectRing" class="progress-ring project-ring"><span id="totalProjectText" class="ring-value">0 / 185h</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <details open>
+    <summary><div><div class="summary-title">Weekly schedule</div><div class="summary-sub">Fitness + 5h priority project</div></div><span class="arrow">⌄</span></summary>
+    <div class="content">
+      <div class="month-nav"><button id="previousMonth">←</button><div id="monthName" class="month-name">October 2026</div><button id="nextMonth">→</button></div>
+      <div class="progress-group">
+        <div class="progress-row"><div class="progress-info"><span class="fitness-text">Fitness</span><span id="fitnessMonthText">0 / 15h · 0%</span></div><div class="progress-track"><div id="fitnessMonthBar" class="progress-fill fitness-fill"></div></div></div>
+        <div class="progress-row"><div class="progress-info"><span class="project-text">Project</span><span id="projectMonthText">0 / 75h · 0%</span></div><div class="progress-track"><div id="projectMonthBar" class="progress-fill project-fill"></div></div></div>
+      </div>
+      <div id="calendar"></div>
+    </div>
+  </details>
+
+  <details open>
+    <summary><div><div class="summary-title">Weight journey</div><div class="summary-sub">Recorded weigh-ins → final record 1 December</div></div><div><span class="goal">Target · 75 kg</span> <span class="arrow">⌄</span></div></summary>
+    <div class="content">
+      <div class="chart-wrap"><svg id="weightChart" viewBox="0 0 700 260"></svg></div>
+      <div class="weight-grid">
+        <div class="weight-box"><h3>Add weigh-in</h3><form id="weightForm"><div class="form-row"><input id="weightDate" type="date"><input id="weightInput" type="number" step="0.1" min="30" max="250" placeholder="kg"></div><button class="add-button">Add weigh-in</button></form></div>
+        <div class="weight-box"><h3>Weight history</h3><table><thead><tr><th>Date</th><th>Weight</th><th>Change</th></tr></thead><tbody id="weightHistory"></tbody></table></div>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary><div class="summary-title">Workout routine</div><span class="arrow">⌄</span></summary>
+    <div class="content workout-grid">
+      <div class="workout-actions"><button type="button" id="openWorkoutLinks" class="workout-link-button">OPEN WORKOUT REFERENCES ↗</button></div>
+      <div><div class="workout-title">Warm-up · 3 min each</div><div class="workout-text">Step-Ups · Mountain Climbers</div></div>
+      <div><div class="workout-title">Abs · 2 min each</div><div class="workout-text">Tabletop Crunch · Weighted Russian Twist · Reverse Crunch · Dead Bug · Side Plank Hip Dips</div></div>
+      <div><div class="workout-title">Legs · 3 min each</div><div class="workout-text">Dumbbell Lunges · Sumo/Goblet Squat · Romanian Deadlift · Side/Lateral Lunges</div></div>
+      <div><div class="workout-title">Arms · 1 min each</div><div class="workout-text">Renegade Row · Upright Row · Floor Press · Floor Fly · One-Arm Overhead Triceps Extension · Alternating Curl · Pullover</div></div>
+      <div><div class="workout-title">Finish · 3 min each</div><div class="workout-text">Superman / Back Extension · Cobra Stretch</div></div>
+    </div>
+  </details>
+</div>
+
+<script>
+const START=new Date(Date.UTC(2026,9,12)),END=new Date(Date.UTC(2026,11,1));
+const monthNames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+let viewMonth=9;
+
+function loadJSON(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback}catch{return fallback}}
+function dateKey(d){return d.toISOString().slice(0,10)}
+const checks=loadJSON("tracker-checks",{});
+for(let d=new Date(START);d<=END;d=new Date(d.getTime()+86400000)){
+  const w=d.getUTCDay(); if(w>=1&&w<=5){const k=dateKey(d);if(!checks[k])checks[k]={fitness:false,project:false}}
+}
+const defaultWeights=[
+ {date:"2026-08-02",weight:80.4},{date:"2026-08-09",weight:85.7},{date:"2026-08-16",weight:85.7},
+ {date:"2026-08-23",weight:84.0},{date:"2026-08-30",weight:84.0},{date:"2026-09-25",weight:82.5},{date:"2026-09-27",weight:81.1}
+];
+let weights=loadJSON("tracker-weights",defaultWeights);
+function save(){localStorage.setItem("tracker-checks",JSON.stringify(checks));localStorage.setItem("tracker-weights",JSON.stringify(weights))}
+
+function renderCalendar(){
+ const calendar=document.getElementById("calendar");calendar.innerHTML="";
+ document.getElementById("monthName").textContent=monthNames[viewMonth]+" 2026";
+ const monthDates=Object.keys(checks).filter(k=>Number(k.slice(5,7))===viewMonth+1).sort();
+ const weeks={};
+ monthDates.forEach(k=>{const d=new Date(k+"T00:00:00Z"),m=new Date(d);m.setUTCDate(d.getUTCDate()-(d.getUTCDay()-1));const wk=dateKey(m);(weeks[wk]??=[]).push(k)});
+ Object.values(weeks).forEach(dates=>{
+   const first=new Date(dates[0]+"T00:00:00Z"),week=document.createElement("div");week.className="week";
+   const title=document.createElement("div");title.className="week-title";title.textContent="Week · "+first.getUTCDate()+" "+monthNames[first.getUTCMonth()].slice(0,3);week.appendChild(title);
+   dates.forEach(k=>{
+     const d=new Date(k+"T00:00:00Z"),s=checks[k],row=document.createElement("div");row.className="day";
+     row.innerHTML=`<div><strong>${dayNames[d.getUTCDay()]}</strong><div class="date-small">${d.getUTCDate()} ${monthNames[d.getUTCMonth()].slice(0,3)}</div></div>
+     <label class="task fitness-task"><input type="checkbox" data-date="${k}" data-type="fitness" ${s.fitness?"checked":""}><span><span class="task-title">Fitness</span><span class="task-time">17–18 · 1h</span></span></label>
+     <label class="task project-task"><input type="checkbox" data-date="${k}" data-type="project" ${s.project?"checked":""}><span><span class="task-title">Project</span><span class="task-time">21–02 · 5h</span></span></label>`;
+     week.appendChild(row);
+   });calendar.appendChild(week);
+ });
+ updateProgress();
+}
+
+function currentWeekKeys(){
+ const all=Object.keys(checks).sort(),today=new Date(),utc=new Date(Date.UTC(today.getFullYear(),today.getMonth(),today.getDate()));
+ let anchor=utc;
+ if(utc<START) anchor=new Date(START);
+ if(utc>END) anchor=new Date(END);
+ const wd=anchor.getUTCDay(),monday=new Date(anchor);monday.setUTCDate(anchor.getUTCDate()-(wd===0?6:wd-1));
+ const keys=[];for(let i=0;i<5;i++){const d=new Date(monday);d.setUTCDate(monday.getUTCDate()+i);const k=dateKey(d);if(checks[k])keys.push(k)}
+ return keys.length?keys:all.slice(0,5);
+}
+
+function updateProgress(){
+ const monthKeys=Object.keys(checks).filter(k=>Number(k.slice(5,7))===viewMonth+1);
+ const fDays=monthKeys.filter(k=>checks[k].fitness).length,pDays=monthKeys.filter(k=>checks[k].project).length;
+ const fHours=fDays,pHours=pDays*5,fMax=monthKeys.length,pMax=monthKeys.length*5;
+ const fp=fMax?Math.round(fHours/fMax*100):0,pp=pMax?Math.round(pHours/pMax*100):0;
+ document.getElementById("fitnessMonthBar").style.width=fp+"%";document.getElementById("projectMonthBar").style.width=pp+"%";
+ document.getElementById("fitnessMonthText").textContent=`${fHours} / ${fMax}h · ${fp}%`;
+ document.getElementById("projectMonthText").textContent=`${pHours} / ${pMax}h · ${pp}%`;
+
+ const wk=currentWeekKeys(),wf=wk.filter(k=>checks[k].fitness).length,wp=wk.filter(k=>checks[k].project).length*5,wfMax=wk.length,wpMax=wk.length*5;
+ const wfp=wfMax?wf/wfMax*100:0,wpp=wpMax?wp/wpMax*100:0;
+ document.getElementById("weekFitnessText").textContent=`${wf} / ${wfMax}h`;document.getElementById("weekProjectText").textContent=`${wp} / ${wpMax}h`;
+ document.getElementById("weekFitnessRing").style.setProperty("--percent",wfp);document.getElementById("weekProjectRing").style.setProperty("--percent",wpp);
+
+ const all=Object.keys(checks),tf=all.filter(k=>checks[k].fitness).length,tp=all.filter(k=>checks[k].project).length*5,tfMax=all.length,tpMax=all.length*5;
+ document.getElementById("totalFitnessText").textContent=`${tf} / ${tfMax}h`;document.getElementById("totalProjectText").textContent=`${tp} / ${tpMax}h`;
+ document.getElementById("totalFitnessRing").style.setProperty("--percent",tfMax?tf/tfMax*100:0);document.getElementById("totalProjectRing").style.setProperty("--percent",tpMax?tp/tpMax*100:0);
+}
+
+document.addEventListener("change",e=>{const i=e.target;if(i.matches("input[data-date]")){checks[i.dataset.date][i.dataset.type]=i.checked;save();updateProgress()}});
+document.getElementById("previousMonth").addEventListener("click",()=>{if(viewMonth>9){viewMonth--;renderCalendar()}});
+document.getElementById("nextMonth").addEventListener("click",()=>{if(viewMonth<11){viewMonth++;renderCalendar()}});
+
+function renderWeights(){
+ weights.sort((a,b)=>a.date.localeCompare(b.date));const h=document.getElementById("weightHistory");h.innerHTML="";
+ [...weights].reverse().forEach((item,ri)=>{
+   const idx=weights.length-1-ri,prev=idx>0?weights[idx-1]:null,diff=prev?item.weight-prev.weight:null,row=document.createElement("tr");
+   const fd=item.date.slice(8,10)+"/"+item.date.slice(5,7),change=diff===null?"—":(diff>0?"+":"")+diff.toFixed(1)+" kg";
+   row.innerHTML=`<td>${fd}</td><td><strong>${item.weight.toFixed(1)} kg</strong></td><td>${change}</td>`;h.appendChild(row);
+ });
+ if(weights.length)document.getElementById("currentWeight").textContent=weights.at(-1).weight.toFixed(1);drawWeightChart();
+}
+document.getElementById("weightForm").addEventListener("submit",e=>{
+ e.preventDefault();const date=document.getElementById("weightDate").value,value=Number(document.getElementById("weightInput").value);
+ if(!date||!Number.isFinite(value)||value<30||value>250)return;const ex=weights.find(x=>x.date===date);if(ex)ex.weight=value;else weights.push({date,weight:value});
+ document.getElementById("weightInput").value="";save();renderWeights();
+});
+
+function drawWeightChart(){
+ const svg=document.getElementById("weightChart");svg.innerHTML="";if(!weights.length)return;
+ const NS="http://www.w3.org/2000/svg",W=700,H=260,L=45,R=20,T=20,B=35,sorted=[...weights].sort((a,b)=>a.date.localeCompare(b.date));
+ const first=new Date(sorted[0].date+"T00:00:00Z"),final=new Date("2026-12-01T00:00:00Z"),vals=sorted.map(x=>x.weight).concat(75),min=Math.floor(Math.min(...vals)-1),max=Math.ceil(Math.max(...vals)+1);
+ const x=date=>L+((new Date(date+"T00:00:00Z")-first)/(final-first))*(W-L-R),y=v=>T+((max-v)/(max-min))*(H-T-B);
+ for(let v=min;v<=max;v+=2){let line=document.createElementNS(NS,"line");Object.entries({x1:L,x2:W-R,y1:y(v),y2:y(v),stroke:"#303238"}).forEach(([k,val])=>line.setAttribute(k,val));svg.appendChild(line);
+   let text=document.createElementNS(NS,"text");Object.entries({x:3,y:y(v)+4,fill:"#92959c","font-size":10}).forEach(([k,val])=>text.setAttribute(k,val));text.textContent=v+"kg";svg.appendChild(text)}
+ let target=document.createElementNS(NS,"line");Object.entries({x1:L,x2:W-R,y1:y(75),y2:y(75),stroke:"#4caf72","stroke-dasharray":"6 6"}).forEach(([k,v])=>target.setAttribute(k,v));svg.appendChild(target);
+ let poly=document.createElementNS(NS,"polyline");poly.setAttribute("points",sorted.map(i=>x(i.date)+","+y(i.weight)).join(" "));Object.entries({fill:"none",stroke:"#7087ff","stroke-width":3,"stroke-linecap":"round","stroke-linejoin":"round"}).forEach(([k,v])=>poly.setAttribute(k,v));svg.appendChild(poly);
+ sorted.forEach(i=>{let c=document.createElementNS(NS,"circle");Object.entries({cx:x(i.date),cy:y(i.weight),r:4,fill:"#7087ff"}).forEach(([k,v])=>c.setAttribute(k,v));svg.appendChild(c)});
+ let ft=document.createElementNS(NS,"text");Object.entries({x:W-R,y:H-8,"text-anchor":"end",fill:"#92959c","font-size":11}).forEach(([k,v])=>ft.setAttribute(k,v));ft.textContent="1 Dec";svg.appendChild(ft);
+}
+
+const workoutLinks=[
+"https://gymvisual.com/img/p/2/1/7/8/3/21783.gif","https://gymvisual.com/img/p/1/9/8/5/7/19857.gif","https://gymvisual.com/img/p/3/6/6/7/3/36673.gif","https://gymvisual.com/img/p/1/8/3/5/9/18359.gif","https://gymvisual.com/img/p/1/6/9/1/6/16916.gif","https://gymvisual.com/img/p/2/1/5/4/1/21541.gif","https://gymvisual.com/img/p/5/1/6/4/5164.gif","https://gymvisual.com/img/p/5/0/4/6/5046.gif","https://gymvisual.com/img/p/2/1/5/9/0/21590.gif","https://i.pinimg.com/originals/a4/87/49/a487496bb775fbf575787df765fcf47d.gif","https://gymvisual.com/img/p/2/9/8/4/0/29840.gif","https://gymvisual.com/img/p/2/0/8/3/6/20836.gif","https://gymvisual.com/img/p/1/8/7/0/1/18701.gif","https://i.pinimg.com/originals/4b/bb/42/4bbb42ef233861f68ca244692493cb3d.gif","https://gymvisual.com/img/p/7/0/2/5/7025.gif","https://gymvisual.com/img/p/1/0/2/8/3/10283.gif","https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Romanian-Deadlift.gif","https://gymvisual.com/img/p/2/1/8/5/0/21850.gif","https://hips.hearstapps.com/hmg-prod/images/workouts/2016/08/supermanpullup-1472153970.gif?crop=1xw:1xh;center,top&resize=640:*","https://media.tenor.com/bHvaGEjp7PcAAAAM/workout-working-out.gif"
+];
+document.getElementById("openWorkoutLinks").addEventListener("click",()=>workoutLinks.forEach(url=>window.open(url,"_blank")));
+
+const today=new Date(),yyyy=today.getFullYear(),mm=String(today.getMonth()+1).padStart(2,"0"),dd=String(today.getDate()).padStart(2,"0");
+document.getElementById("weightDate").value=`${yyyy}-${mm}-${dd}`;
+renderCalendar();renderWeights();save();
+</script>
+</body>
+</html>
