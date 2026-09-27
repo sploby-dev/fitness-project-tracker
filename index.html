@@ -40,6 +40,23 @@ body {
 
 .header {
   margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-pic {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 28%;
+  flex-shrink: 0;
+  border: 2px solid var(--border);
+}
+
+.header-text {
+  min-width: 0;
 }
 
 .header h1 {
@@ -417,6 +434,32 @@ th, td {
   gap: 18px;
 }
 
+  .workout-actions {
+  grid-column: 1 / -1;
+}
+
+.workout-link-button {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card2);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease;
+}
+
+.workout-link-button:hover {
+  background: #292c32;
+}
+
+.workout-link-button:active {
+  transform: scale(.98);
+}
+
 .workout-title {
   font-size: 14px;
   font-weight: 650;
@@ -473,10 +516,14 @@ th, td {
 
 <div class="app">
 
-  <div class="header">
+ <div class="header">
+  <img src="profile_pic.jpg" alt="Profile" class="profile-pic">
+
+  <div class="header-text">
     <h1>Fitness + Project Tracker</h1>
     <p>12 October → 1 December 2026</p>
   </div>
+</div>
 
   <section class="stats">
 
@@ -697,6 +744,11 @@ th, td {
     </summary>
 
     <div class="content workout-grid">
+      <div class="workout-actions">
+  <button type="button" id="openWorkoutLinks" class="workout-link-button">
+    OPEN WORKOUT REFERENCES ↗
+  </button>
+</div>
 
       <div>
         <div class="workout-title">
@@ -1892,6 +1944,46 @@ document.getElementById(
 ).value =
   `${yyyy}-${mm}-${dd}`;
 
+
+
+/* ------------------------------
+   WORKOUT REFERENCES
+-------------------------------- */
+
+const workoutLinks = [
+  "https://gymvisual.com/img/p/2/1/7/8/3/21783.gif",
+  "https://gymvisual.com/img/p/1/9/8/5/7/19857.gif",
+  "https://gymvisual.com/img/p/3/6/6/7/3/36673.gif",
+  "https://gymvisual.com/img/p/1/8/3/5/9/18359.gif",
+  "https://gymvisual.com/img/p/1/6/9/1/6/16916.gif",
+  "https://gymvisual.com/img/p/2/1/5/4/1/21541.gif",
+  "https://gymvisual.com/img/p/5/1/6/4/5164.gif",
+  "https://gymvisual.com/img/p/5/0/4/6/5046.gif",
+  "https://gymvisual.com/img/p/2/1/5/9/0/21590.gif",
+  "https://i.pinimg.com/originals/a4/87/49/a487496bb775fbf575787df765fcf47d.gif",
+  "https://gymvisual.com/img/p/2/9/8/4/0/29840.gif",
+  "https://gymvisual.com/img/p/2/0/8/3/6/20836.gif",
+  "https://gymvisual.com/img/p/1/8/7/0/1/18701.gif",
+  "https://i.pinimg.com/originals/4b/bb/42/4bbb42ef233861f68ca244692493cb3d.gif",
+  "https://gymvisual.com/img/p/7/0/2/5/7025.gif",
+  "https://gymvisual.com/img/p/1/0/2/8/3/10283.gif",
+  "https://fitnessprogramer.com/wp-content/uploads/2021/02/Barbell-Romanian-Deadlift.gif",
+  "https://gymvisual.com/img/p/2/1/8/5/0/21850.gif",
+  "https://hips.hearstapps.com/hmg-prod/images/workouts/2016/08/supermanpullup-1472153970.gif?crop=1xw:1xh;center,top&resize=640:*",
+  "https://media.tenor.com/bHvaGEjp7PcAAAAM/workout-working-out.gif"
+];
+
+document.getElementById("openWorkoutLinks")
+  .addEventListener("click", () => {
+
+    workoutLinks.forEach(url => {
+      window.open(url, "_blank");
+    });
+
+  });
+
+
+  
 
 /* ------------------------------
    START APP
