@@ -1,1 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111214">
 
+<title>Fitness + Project Tracker</title>
+
+<style>
+:root {
+  --bg: #0f1012;
+  --card: #181a1e;
+  --card2: #202227;
+  --border: #303238;
+  --text: #f3f3f3;
+  --muted: #92959c;
+  --fitness: #e45555;
+  --project: #4caf72;
+  --accent: #7087ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+               "Segoe UI", sans-serif;
+}
+
+.app {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.header {
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.header p {
+  color: var(--muted);
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+
+/* TOP CARDS */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 18px;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+
+.weight-number {
+  font-size: 34px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.goal {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.stat-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 650;
+  margin-top: 8px;
+}
+
+/* RINGS */
+
+.ring {
+  --percent: 0;
+  --ringColor: var(--accent);
+
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      var(--ringColor) calc(var(--percent) * 1%),
+      #34363c 0
+    );
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ring::after {
+  content: "";
+  position: absolute;
+  width: 62px;
+  height: 62px;
+  background: var(--card);
+  border-radius: 50%;
+}
+
+.ring span {
+  position: relative;
+  z-index: 2;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fitness-ring {
+  --ringColor: var(--fitness);
+}
+
+/* COLLAPSIBLE SECTIONS */
+
+details {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+summary {
+  padding: 18px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.summary-sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.arrow {
+  font-size: 20px;
+  transition: .2s;
+}
+
+details[open] .arrow {
+  transform: rotate(180deg);
+}
+
+.content {
+  border-top: 1px solid var(--border);
+  padding: 18px;
+}
+
+/* MONTH NAV */
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.month-nav button {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.month-name {
+  min-width: 130px;
+  text-align: center;
+  font-weight: 650;
+}
+
+/* MONTH PROGRESS */
+
+.progress-group {
+  margin-bottom: 22px;
+}
+
+.progress-row {
+  margin-bottom: 14px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+.fitness-text {
+  color: var(--fitness);
+  font-weight: 650;
+}
+
+.project-text {
+  color: var(--project);
+  font-weight: 650;
+}
+
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background: #34363c;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 100px;
+  transition: width .25s;
+}
+
+.fitness-fill {
+  background: var(--fitness);
+}
+
+.project-fill {
+  background: var(--project);
+}
+
+/* WEEK */
+
+.week {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.week-title {
+  background: var(--card2);
+  padding: 10px 13px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.day {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border-top: 1px solid var(--border);
+}
+
+.day:first-child {
+  border-top: none;
+}
+
+.date-small {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.task input {
+  width: 19px;
+  height: 19px;
+  cursor: pointer;
+}
+
+.task-title {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.task-time {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.fitness-task .task-title {
+  color: var(--fitness);
+}
+
+.project-task .task-title {
+  color: var(--project);
+}
+
+/* WEIGHT CHART */
+
+.chart-wrap {
+  overflow-x: auto;
+}
+
+#weightChart {
+  width: 100%;
+  min-width: 580px;
+  height: 260px;
+}
+
+.weight-grid {
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  gap: 14px;
+  margin-top: 15px;
+}
+
+.weight-box {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.weight-box h3 {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 8px;
+}
+
+input[type="date"],
+input[type="number"] {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: white;
+  padding: 11px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.add-button {
+  margin-top: 8px;
+  width: 100%;
+  border: 0;
+  background: var(--accent);
+  color: white;
+  border-radius: 9px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+th, td {
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* WORKOUT */
+
+.workout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.workout-title {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.workout-text {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin-top: 5px;
+}
+
+/* MOBILE */
+
+@media (max-width: 680px) {
+
+  .app {
+    padding: 12px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .day {
+    grid-template-columns: 60px 1fr 1fr;
+    padding: 10px;
+  }
+
+  .task-title {
+    font-size: 13px;
+  }
+
+  .weight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .month-nav {
+    justify-content: center;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="header">
+    <h1>Fitness + Project Tracker</h1>
+    <p>12 October → 1 December 2026</p>
+  </div>
+
+  <section class="stats">
+
+    <div class="card">
+      <div class="label">CURRENT WEIGHT</div>
+
+      <div>
+        <span id="currentWeight" class="weight-number">81.1</span>
+        <span>kg</span>
+      </div>
+
+      <div class="goal">Goal · 75 kg</div>
+    </div>
+
+    <div class="card stat-flex">
+
+      <div>
+        <div class="label">FITNESS THIS WEEK</div>
+        <div id="weekText" class="stat-value">0 of 5</div>
+        <div class="goal">Mon–Fri</div>
+      </div>
+
+      <div id="weekRing" class="ring fitness-ring">
+        <span id="weekPercent">0%</span>
+      </div>
+
+    </div>
+
+    <div class="card stat-flex">
+
+      <div>
+        <div class="label">UNTIL THE END</div>
+        <div class="stat-value">1 Dec 2026</div>
+        <div id="totalText" class="goal">0 of 37 days</div>
+      </div>
+
+      <div id="totalRing" class="ring">
+        <span id="totalPercent">0%</span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- WEEKLY SCHEDULE -->
+
+  <details open>
+
+    <summary>
+
+      <div>
+        <div class="summary-title">Weekly schedule</div>
+        <div class="summary-sub">Fitness + 5h priority project</div>
+      </div>
+
+      <span class="arrow">⌄</span>
+
+    </summary>
+
+    <div class="content">
+
+      <div class="month-nav">
+
+        <button id="previousMonth">←</button>
+
+        <div id="monthName" class="month-name">
+          October 2026
+        </div>
+
+        <button id="nextMonth">→</button>
+
+      </div>
+
+
+      <div class="progress-group">
+
+        <div class="progress-row">
+
+          <div class="progress-info">
+            <span class="fitness-text">Fitness</span>
+            <span id="fitnessMonthText">0 / 15 · 0%</span>
+          </div>
+
+          <div class="progress-track">
+            <div id="fitnessMonthBar"
+                 class="progress-fill fitness-fill">
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="progress-row">
+
+          <div class="progress-info">
+            <span class="project-text">Project</span>
+            <span id="projectMonthText">0 / 15 · 0%</span>
+          </div>
+
+          <div class="progress-track">
+            <div id="projectMonthBar"
+                 class="progress-fill project-fill">
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="calendar"></div>
+
+    </div>
+
+  </details>
+
+
+  <!-- WEIGHT -->
+
+  <details open>
+
+    <summary>
+
+      <div>
+        <div class="summary-title">Weight journey</div>
+        <div class="summary-sub">
+          Recorded weigh-ins → final record 1 December
+        </div>
+      </div>
+
+      <div>
+        <span class="goal">Target · 75 kg</span>
+        <span class="arrow">⌄</span>
+      </div>
+
+    </summary>
+
+    <div class="content">
+
+      <div class="chart-wrap">
+        <svg id="weightChart"
+             viewBox="0 0 700 260">
+        </svg>
+      </div>
+
+
+      <div class="weight-grid">
+
+        <div class="weight-box">
+
+          <h3>Add weigh-in</h3>
+
+          <form id="weightForm">
+
+            <div class="form-row">
+
+              <input id="weightDate"
+                     type="date">
+
+              <input id="weightInput"
+                     type="number"
+                     step="0.1"
+                     min="30"
+                     max="250"
+                     placeholder="kg">
+
+            </div>
+
+            <button class="add-button">
+              Add weigh-in
+            </button>
+
+          </form>
+
+        </div>
+
+
+        <div class="weight-box">
+
+          <h3>Weight history</h3>
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+
+            <tbody id="weightHistory"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </details>
+
+
+  <!-- WORKOUT -->
+
+  <details>
+
+    <summary>
+
+      <div class="summary-title">
+        Workout routine
+      </div>
+
+      <span class="arrow">⌄</span>
+
+    </summary>
+
+    <div class="content workout-grid">
+
+      <div>
+        <div class="workout-title">
+          Warm-up · 3 min each
+        </div>
+        <div class="workout-text">
+          Step-Ups · Mountain Climbers
+        </div>
+      </div>
+
+      <div>
+        <div class="workout-title">
+          Abs · 2 min each
+        </div>
+        <div class="workout-text">
+          Tabletop Crunch · Weighted Russian Twist ·
+          Reverse Crunch · Dead Bug · Side Plank Hip Dips
+        </div>
+      </div>
+
+      <div>
+        <div class="workout-title">
+          Legs · 3 min each
+        </div>
+        <div class="workout-text">
+          Dumbbell Lunges · Sumo/Goblet Squat ·
+          Romanian Deadlift · Side/Lateral Lunges
+        </div>
+      </div>
+
+      <div>
+        <div class="workout-title">
+          Arms · 1 min each
+        </div>
+        <div class="workout-text">
+          Renegade Row · Upright Row · Floor Press ·
+          Floor Fly · One-Arm Overhead Triceps Extension ·
+          Alternating Curl · Pullover
+        </div>
+      </div>
+
+      <div>
+        <div class="workout-title">
+          Finish · 3 min each
+        </div>
+        <div class="workout-text">
+          Superman / Back Extension · Cobra Stretch
+        </div>
+      </div>
+
+    </div>
+
+  </details>
+
+</div>
+
+
+<script>
+
+/* ------------------------------
+   SETTINGS
+-------------------------------- */
+
+const START = new Date(Date.UTC(2026,9,12));
+const END   = new Date(Date.UTC(2026,11,1));
+
+const monthNames = [
+ "January","February","March","April",
+ "May","June","July","August",
+ "September","October","November","December"
+];
+
+const dayNames = [
+ "Sun","Mon","Tue","Wed","Thu","Fri","Sat"
+];
+
+let viewMonth = 9;
+
+
+/* ------------------------------
+   STORAGE
+-------------------------------- */
+
+function loadJSON(key, fallback) {
+
+  try {
+
+    const value = localStorage.getItem(key);
+
+    return value
+      ? JSON.parse(value)
+      : fallback;
+
+  } catch {
+
+    return fallback;
+
+  }
+
+}
+
+function save() {
+
+  localStorage.setItem(
+    "tracker-checks",
+    JSON.stringify(checks)
+  );
+
+  localStorage.setItem(
+    "tracker-weights",
+    JSON.stringify(weights)
+  );
+
+}
+
+
+/* ------------------------------
+   SCHEDULE
+-------------------------------- */
+
+const checks = loadJSON(
+  "tracker-checks",
+  {}
+);
+
+function dateKey(date) {
+  return date.toISOString().slice(0,10);
+}
+
+for (
+  let d = new Date(START);
+  d <= END;
+  d = new Date(d.getTime()+86400000)
+) {
+
+  const weekday = d.getUTCDay();
+
+  if (weekday >= 1 && weekday <= 5) {
+
+    const key = dateKey(d);
+
+    if (!checks[key]) {
+
+      checks[key] = {
+        fitness:false,
+        project:false
+      };
+
+    }
+
+  }
+
+}
+
+
+/* ------------------------------
+   WEIGHTS
+-------------------------------- */
+
+const defaultWeights = [
+
+ {date:"2026-08-02",weight:80.4},
+ {date:"2026-08-09",weight:85.7},
+ {date:"2026-08-16",weight:85.7},
+ {date:"2026-08-23",weight:84.0},
+ {date:"2026-08-30",weight:84.0},
+ {date:"2026-09-25",weight:82.5},
+ {date:"2026-09-27",weight:81.1}
+
+];
+
+let weights = loadJSON(
+  "tracker-weights",
+  defaultWeights
+);
+
+
+/* ------------------------------
+   CALENDAR
+-------------------------------- */
+
+function renderCalendar() {
+
+  const calendar =
+    document.getElementById("calendar");
+
+  calendar.innerHTML = "";
+
+  document.getElementById("monthName")
+    .textContent =
+    monthNames[viewMonth] + " 2026";
+
+
+  const monthDates =
+    Object.keys(checks)
+    .filter(key =>
+      Number(key.slice(5,7))
+      === viewMonth + 1
+    );
+
+
+  const weeks = {};
+
+  monthDates.forEach(key => {
+
+    const d =
+      new Date(key+"T00:00:00Z");
+
+    const monday =
+      new Date(d);
+
+    monday.setUTCDate(
+      d.getUTCDate() -
+      (d.getUTCDay()-1)
+    );
+
+    const weekKey =
+      dateKey(monday);
+
+    if (!weeks[weekKey])
+      weeks[weekKey] = [];
+
+    weeks[weekKey].push(key);
+
+  });
+
+
+  Object.values(weeks)
+  .forEach(dates => {
+
+    const first =
+      new Date(
+        dates[0]+"T00:00:00Z"
+      );
+
+    const week =
+      document.createElement("div");
+
+    week.className = "week";
+
+
+    const title =
+      document.createElement("div");
+
+    title.className = "week-title";
+
+    title.textContent =
+      "Week · " +
+      first.getUTCDate() +
+      " " +
+      monthNames[
+        first.getUTCMonth()
+      ].slice(0,3);
+
+    week.appendChild(title);
+
+
+    dates.forEach(key => {
+
+      const d =
+        new Date(
+          key+"T00:00:00Z"
+        );
+
+      const state =
+        checks[key];
+
+
+      const row =
+        document.createElement("div");
+
+      row.className = "day";
+
+
+      row.innerHTML = `
+
+        <div>
+
+          <strong>
+            ${dayNames[d.getUTCDay()]}
+          </strong>
+
+          <div class="date-small">
+            ${d.getUTCDate()}
+            ${monthNames[
+              d.getUTCMonth()
+            ].slice(0,3)}
+          </div>
+
+        </div>
+
+
+        <label class="task fitness-task">
+
+          <input
+            type="checkbox"
+            data-date="${key}"
+            data-type="fitness"
+            ${state.fitness
+              ? "checked"
+              : ""}
+          >
+
+          <span>
+
+            <span class="task-title">
+              Fitness
+            </span>
+
+            <span class="task-time">
+              17–18
+            </span>
+
+          </span>
+
+        </label>
+
+
+        <label class="task project-task">
+
+          <input
+            type="checkbox"
+            data-date="${key}"
+            data-type="project"
+            ${state.project
+              ? "checked"
+              : ""}
+          >
+
+          <span>
+
+            <span class="task-title">
+              Project
+            </span>
+
+            <span class="task-time">
+              21–02 · 5h
+            </span>
+
+          </span>
+
+        </label>
+
+      `;
+
+      week.appendChild(row);
+
+    });
+
+    calendar.appendChild(week);
+
+  });
+
+  updateProgress();
+
+}
+
+
+/* ------------------------------
+   PROGRESS
+-------------------------------- */
+
+function updateProgress() {
+
+  const monthKeys =
+    Object.keys(checks)
+    .filter(key =>
+      Number(key.slice(5,7))
+      === viewMonth + 1
+    );
+
+
+  const fitnessDone =
+    monthKeys.filter(
+      key => checks[key].fitness
+    ).length;
+
+
+  const projectDone =
+    monthKeys.filter(
+      key => checks[key].project
+    ).length;
+
+
+  const fitnessPercent =
+    monthKeys.length
+      ? Math.round(
+          fitnessDone /
+          monthKeys.length *
+          100
+        )
+      : 0;
+
+
+  const projectPercent =
+    monthKeys.length
+      ? Math.round(
+          projectDone /
+          monthKeys.length *
+          100
+        )
+      : 0;
+
+
+  document.getElementById(
+    "fitnessMonthBar"
+  ).style.width =
+    fitnessPercent+"%";
+
+
+  document.getElementById(
+    "projectMonthBar"
+  ).style.width =
+    projectPercent+"%";
+
+
+  document.getElementById(
+    "fitnessMonthText"
+  ).textContent =
+    `${fitnessDone} / ${monthKeys.length} · ${fitnessPercent}%`;
+
+
+  document.getElementById(
+    "projectMonthText"
+  ).textContent =
+    `${projectDone} / ${monthKeys.length} · ${projectPercent}%`;
+
+
+  /* THIS WEEK */
+
+  const allKeys =
+    Object.keys(checks)
+    .sort();
+
+
+  const today = new Date();
+
+  const utcToday =
+    new Date(Date.UTC(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    ));
+
+
+  const weekday =
+    utcToday.getUTCDay();
+
+
+  const monday =
+    new Date(utcToday);
+
+
+  monday.setUTCDate(
+    utcToday.getUTCDate() -
+    (weekday === 0
+      ? 6
+      : weekday - 1)
+  );
+
+
+  const weekKeys = [];
+
+  for (let i=0;i<5;i++) {
+
+    const d =
+      new Date(monday);
+
+    d.setUTCDate(
+      monday.getUTCDate()+i
+    );
+
+    const key =
+      dateKey(d);
+
+    if (checks[key])
+      weekKeys.push(key);
+
+  }
+
+
+  const weekFitness =
+    weekKeys.filter(
+      key => checks[key].fitness
+    ).length;
+
+
+  const weekPercent =
+    weekKeys.length
+      ? Math.round(
+          weekFitness /
+          weekKeys.length *
+          100
+        )
+      : 0;
+
+
+  document.getElementById(
+    "weekText"
+  ).textContent =
+    `${weekFitness} of ${weekKeys.length || 5}`;
+
+
+  document.getElementById(
+    "weekPercent"
+  ).textContent =
+    weekPercent+"%";
+
+
+  document.getElementById(
+    "weekRing"
+  ).style.setProperty(
+    "--percent",
+    weekPercent
+  );
+
+
+  /* UNTIL END */
+
+  const totalFitness =
+    allKeys.filter(
+      key => checks[key].fitness
+    ).length;
+
+
+  const totalPercent =
+    Math.round(
+      totalFitness /
+      allKeys.length *
+      100
+    );
+
+
+  document.getElementById(
+    "totalText"
+  ).textContent =
+    `${totalFitness} of ${allKeys.length} days`;
+
+
+  document.getElementById(
+    "totalPercent"
+  ).textContent =
+    totalPercent+"%";
+
+
+  document.getElementById(
+    "totalRing"
+  ).style.setProperty(
+    "--percent",
+    totalPercent
+  );
+
+}
+
+
+/* ------------------------------
+   CHECKBOXES
+-------------------------------- */
+
+document.addEventListener(
+  "change",
+  event => {
+
+    const input =
+      event.target;
+
+    if (
+      input.matches(
+        "input[data-date]"
+      )
+    ) {
+
+      checks[
+        input.dataset.date
+      ][
+        input.dataset.type
+      ] =
+        input.checked;
+
+      save();
+
+      updateProgress();
+
+    }
+
+  }
+);
+
+
+/* ------------------------------
+   MONTH NAVIGATION
+-------------------------------- */
+
+document.getElementById(
+  "previousMonth"
+).addEventListener(
+  "click",
+  () => {
+
+    if (viewMonth > 9) {
+
+      viewMonth--;
+
+      renderCalendar();
+
+    }
+
+  }
+);
+
+
+document.getElementById(
+  "nextMonth"
+).addEventListener(
+  "click",
+  () => {
+
+    if (viewMonth < 11) {
+
+      viewMonth++;
+
+      renderCalendar();
+
+    }
+
+  }
+);
+
+
+/* ------------------------------
+   WEIGHT HISTORY
+-------------------------------- */
+
+function renderWeights() {
+
+  weights.sort(
+    (a,b) =>
+      a.date.localeCompare(b.date)
+  );
+
+
+  const history =
+    document.getElementById(
+      "weightHistory"
+    );
+
+  history.innerHTML = "";
+
+
+  [...weights]
+  .reverse()
+  .forEach((item,reverseIndex) => {
+
+    const index =
+      weights.length -
+      1 -
+      reverseIndex;
+
+
+    const previous =
+      index > 0
+        ? weights[index-1]
+        : null;
+
+
+    const difference =
+      previous
+        ? item.weight -
+          previous.weight
+        : null;
+
+
+    const row =
+      document.createElement("tr");
+
+
+    const formattedDate =
+      item.date.slice(8,10)
+      + "/"
+      + item.date.slice(5,7);
+
+
+    let change = "—";
+
+    if (difference !== null) {
+
+      change =
+        (difference > 0
+          ? "+"
+          : "")
+        +
+        difference.toFixed(1)
+        +
+        " kg";
+
+    }
+
+
+    row.innerHTML = `
+
+      <td>${formattedDate}</td>
+
+      <td>
+        <strong>
+          ${item.weight.toFixed(1)} kg
+        </strong>
+      </td>
+
+      <td>${change}</td>
+
+    `;
+
+
+    history.appendChild(row);
+
+  });
+
+
+  if (weights.length) {
+
+    document.getElementById(
+      "currentWeight"
+    ).textContent =
+      weights[
+        weights.length-1
+      ].weight.toFixed(1);
+
+  }
+
+
+  drawWeightChart();
+
+}
+
+
+/* ------------------------------
+   ADD WEIGHT
+-------------------------------- */
+
+document.getElementById(
+  "weightForm"
+).addEventListener(
+  "submit",
+  event => {
+
+    event.preventDefault();
+
+
+    const date =
+      document.getElementById(
+        "weightDate"
+      ).value;
+
+
+    const value =
+      Number(
+        document.getElementById(
+          "weightInput"
+        ).value
+      );
+
+
+    if (
+      !date ||
+      !Number.isFinite(value) ||
+      value < 30 ||
+      value > 250
+    ) return;
+
+
+    const existing =
+      weights.find(
+        item =>
+          item.date === date
+      );
+
+
+    if (existing) {
+
+      existing.weight =
+        value;
+
+    } else {
+
+      weights.push({
+        date,
+        weight:value
+      });
+
+    }
+
+
+    document.getElementById(
+      "weightInput"
+    ).value = "";
+
+
+    save();
+
+    renderWeights();
+
+  }
+);
+
+
+/* ------------------------------
+   WEIGHT GRAPH
+-------------------------------- */
+
+function drawWeightChart() {
+
+  const svg =
+    document.getElementById(
+      "weightChart"
+    );
+
+
+  svg.innerHTML = "";
+
+
+  if (!weights.length)
+    return;
+
+
+  const NS =
+    "http://www.w3.org/2000/svg";
+
+
+  const width = 700;
+  const height = 260;
+
+  const left = 45;
+  const right = 20;
+  const top = 20;
+  const bottom = 35;
+
+
+  const sorted =
+    [...weights].sort(
+      (a,b) =>
+        a.date.localeCompare(b.date)
+    );
+
+
+  const firstDate =
+    new Date(
+      sorted[0].date+
+      "T00:00:00Z"
+    );
+
+
+  const finalDate =
+    new Date(
+      "2026-12-01T00:00:00Z"
+    );
+
+
+  const values =
+    sorted.map(
+      item => item.weight
+    );
+
+
+  values.push(75);
+
+
+  const minimum =
+    Math.floor(
+      Math.min(...values)-1
+    );
+
+
+  const maximum =
+    Math.ceil(
+      Math.max(...values)+1
+    );
+
+
+  function x(date) {
+
+    const d =
+      new Date(
+        date+"T00:00:00Z"
+      );
+
+    return left +
+      (
+        (d-firstDate) /
+        (finalDate-firstDate)
+      ) *
+      (
+        width-left-right
+      );
+
+  }
+
+
+  function y(value) {
+
+    return top +
+      (
+        (maximum-value) /
+        (maximum-minimum)
+      ) *
+      (
+        height-top-bottom
+      );
+
+  }
+
+
+  /* GRID */
+
+  for (
+    let value=minimum;
+    value<=maximum;
+    value+=2
+  ) {
+
+    const line =
+      document.createElementNS(
+        NS,
+        "line"
+      );
+
+    line.setAttribute(
+      "x1",
+      left
+    );
+
+    line.setAttribute(
+      "x2",
+      width-right
+    );
+
+    line.setAttribute(
+      "y1",
+      y(value)
+    );
+
+    line.setAttribute(
+      "y2",
+      y(value)
+    );
+
+    line.setAttribute(
+      "stroke",
+      "#303238"
+    );
+
+    svg.appendChild(line);
+
+
+    const text =
+      document.createElementNS(
+        NS,
+        "text"
+      );
+
+    text.setAttribute(
+      "x",
+      3
+    );
+
+    text.setAttribute(
+      "y",
+      y(value)+4
+    );
+
+    text.setAttribute(
+      "fill",
+      "#92959c"
+    );
+
+    text.setAttribute(
+      "font-size",
+      "10"
+    );
+
+    text.textContent =
+      value+"kg";
+
+    svg.appendChild(text);
+
+  }
+
+
+  /* TARGET */
+
+  const target =
+    document.createElementNS(
+      NS,
+      "line"
+    );
+
+  target.setAttribute(
+    "x1",
+    left
+  );
+
+  target.setAttribute(
+    "x2",
+    width-right
+  );
+
+  target.setAttribute(
+    "y1",
+    y(75)
+  );
+
+  target.setAttribute(
+    "y2",
+    y(75)
+  );
+
+  target.setAttribute(
+    "stroke",
+    "#4caf72"
+  );
+
+  target.setAttribute(
+    "stroke-dasharray",
+    "6 6"
+  );
+
+  svg.appendChild(target);
+
+
+  /* WEIGHT LINE */
+
+  const polyline =
+    document.createElementNS(
+      NS,
+      "polyline"
+    );
+
+
+  polyline.setAttribute(
+    "points",
+    sorted.map(
+      item =>
+        x(item.date)
+        + ","
+        + y(item.weight)
+    ).join(" ")
+  );
+
+
+  polyline.setAttribute(
+    "fill",
+    "none"
+  );
+
+
+  polyline.setAttribute(
+    "stroke",
+    "#7087ff"
+  );
+
+
+  polyline.setAttribute(
+    "stroke-width",
+    "3"
+  );
+
+
+  polyline.setAttribute(
+    "stroke-linecap",
+    "round"
+  );
+
+
+  polyline.setAttribute(
+    "stroke-linejoin",
+    "round"
+  );
+
+
+  svg.appendChild(polyline);
+
+
+  /* DOTS */
+
+  sorted.forEach(item => {
+
+    const circle =
+      document.createElementNS(
+        NS,
+        "circle"
+      );
+
+
+    circle.setAttribute(
+      "cx",
+      x(item.date)
+    );
+
+
+    circle.setAttribute(
+      "cy",
+      y(item.weight)
+    );
+
+
+    circle.setAttribute(
+      "r",
+      4
+    );
+
+
+    circle.setAttribute(
+      "fill",
+      "#7087ff"
+    );
+
+
+    svg.appendChild(circle);
+
+  });
+
+
+  /* FINAL DATE */
+
+  const finalText =
+    document.createElementNS(
+      NS,
+      "text"
+    );
+
+
+  finalText.setAttribute(
+    "x",
+    width-right
+  );
+
+
+  finalText.setAttribute(
+    "y",
+    height-8
+  );
+
+
+  finalText.setAttribute(
+    "text-anchor",
+    "end"
+  );
+
+
+  finalText.setAttribute(
+    "fill",
+    "#92959c"
+  );
+
+
+  finalText.setAttribute(
+    "font-size",
+    "11"
+  );
+
+
+  finalText.textContent =
+    "1 Dec";
+
+
+  svg.appendChild(finalText);
+
+}
+
+
+/* ------------------------------
+   INITIAL DATE
+-------------------------------- */
+
+const today =
+  new Date();
+
+const yyyy =
+  today.getFullYear();
+
+const mm =
+  String(
+    today.getMonth()+1
+  ).padStart(2,"0");
+
+const dd =
+  String(
+    today.getDate()
+  ).padStart(2,"0");
+
+
+document.getElementById(
+  "weightDate"
+).value =
+  `${yyyy}-${mm}-${dd}`;
+
+
+/* ------------------------------
+   START APP
+-------------------------------- */
+
+renderCalendar();
+
+renderWeights();
+
+save();
+
+</script>
+
+</body>
+</html>
